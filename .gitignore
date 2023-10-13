@@ -1,0 +1,16 @@
+start_local.sh
+.Rproj.user
+*~
+.Rhistory
+*.swp
+.snakemake
+.snakemake/*
+*.Rproj
+renv/local
+renv/local/*
+bin/ARACNE
+bin/ARACNE/*
+src/ARACNE
+src/ARACNE/*
+src/contrib
+src/contrib/*
