@@ -1,85 +1,60 @@
-datadir: /datos/ot/diana/regulacion-trans
+datadir: /datos/ot/diana/llrc
 xenadir: xena
 tissues:
 - name: bladder
-  step1: gc-upper
-  step2: length-full
-  step3: tmm
+  tcgat: blca
 - name: brain
   normal: Brain - Cortex
   cancer: Brain Lower Grade Glioma
-  step1: gc-upper
-  step2: length-full
-  step3: tmm
+  tcgat: lgg
 - name: breast
-  step1: gc-upper
-  step2: length-no
-  step3: tmm
+  tcgat: brca
 - name: colon
   normal: Colon - Transverse 
   cancer: Colon Adenocarcinoma
-  step1: gc-upper
-  step2: length-upper
-  step3: tmm
+  tcgat: coad
 - name: esophagus
   normal: Esophagus - Mucosa
   cancer: Esophageal Carcinoma
-  step1: gc-upper
-  step2: length-full
-  step3: tmm
+  tcgat: none
 - name: kidney
-  step1: gc-upper
-  step2: length-no
-  step3: tmm
+  tcgat: kirc
 - name: liver
   normal: Liver
   cancer: Liver Hepatocellular Carcinoma
-  step1: gc-median
-  step2: length-full
-  step3: tmm
+  tcgat: lihc
 - name: lung
-  step1: length-full
-  step2: gc-median
-  step3: tmm
+  tcgat: lusc
 - name: ovary
   normal: Ovary
   cancer: Ovarian Serous Cystadenocarcinoma
-  step1: gc-full
-  step2: length-full
-  step3: tmm
+  tcgat: ov
 - name: pancreas
   normal: Pancreas
   cancer: Pancreatic Adenocarcinoma
-  step1: gc-upper
-  step2: length-median
-  step3: tmm
+  tcgat: none
 - name: prostate
   normal: Prostate
   cancer: Prostate Adenocarcinoma
-  step1: gc-upper
-  step2: length-median
-  step3: tmm
+  tcgat: prad
 - name: skin
   normal: Skin - Not Sun Exposed (Suprapubic)
   cancer: Skin Cutaneous Melanoma
-  step1: gc-upper
-  step2: length-full
-  step3: tmm
-- name: testis
+  tcgat: skcm
+- name: testis 
+# No normal
   normal: Testis
   cancer: Testicular Germ Cell Tumor
-  step1: gc-upper
-  step2: length-full
-  step3: tmm
+  tcgat: none
 - name: thyroid
-  step1: gc-full
-  step2: length-full
-  step3: tmm
+  tcgat: thca
 - name: uterus
-  step1: gc-full
-  step2: length-no
-  step3: tmm
+  tcgat: ucec
 xena: [colon, skin, pancreas, esophagus, liver, brain, ovary, testis, prostate]
+new_annot: /home/dgarcia/Workspace/llrc/input/gencode.v44.annotation.gtf.gz
+gdc_annot: /home/dgarcia/Workspace/llrc/input/gencode.v36.annotation.gtf.gz
 # Aracne image from: https://github.com/ddiannae/ARACNE-multicore
-aracne_singularity: /home/dgarcia/Workspace/aracne-singularity/aracne.sif
-end: "deg"
+aracne_singularity: /home/dgarcia/Workspace/aracne-singularity/aracne_multicore.sif
+end: ascat
+biomart: /home/dgarcia/Workspace/llrc-pipeline/input/Biomart_Ensembl102_GRCh38_p13.txt
+

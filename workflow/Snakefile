@@ -13,13 +13,17 @@ include: "rules/qc.smk"
 include: "rules/raw.smk"
 include: "rules/xena.smk"
 include: "rules/gdc.smk"
+include: "rules/ascat.smk"
 
 
 wildcard_constraints:
     tissue="[A-Za-z]+",
     type="normal|cancer",
-    arsyn="si-arsyn|no-arsyn"
+    arsyn="|arsyn\_",
+    data_format="raw|deseq2|tpm",
+    gene_id="name|ensembl"
 
 rule all:
     input:
         get_output_files
+
