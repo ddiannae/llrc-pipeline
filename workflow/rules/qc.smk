@@ -1,20 +1,6 @@
-rule qc:
-    input:
-        config["datadir"]+"/{tissue}/rdata/raw_full_unfiltered.RData"
-    output:
-        config["datadir"]+"/{tissue}/plots/{plots_type}/rna_composition.png"
-    params:
-        tissue_dir=get_tissue_dir,
-        plots_type="{plots_type}"
-    log:
-        config["datadir"]+"/{tissue}/log/{plots_type}_qc.log"
-    script:
-        "../scripts/NOISeqPlots.R"
-
 rule filter_low_expression:
     input:
         config["datadir"]+"/{tissue}/rdata/raw_full_unfiltered.RData",
-        config["datadir"]+"/{tissue}/plots/raw/rna_composition.png"
     output:
         config["datadir"]+"/{tissue}/rdata/raw_full.RData"
     log:
@@ -22,42 +8,54 @@ rule filter_low_expression:
     script:
         "../scripts/filterLowExpression.R"
 
-rule pca:
+rule qc:
     input:
-        config["datadir"]+"/{tissue}/rdata/{plots_type}_full.RData"
+        config["datadir"]+"/{tissue}/rdata/{data_format}_full.RData"
     output:
-        score=config["datadir"]+"/{tissue}/plots/{plots_type}/pca_score.png",
-        loading=config["datadir"]+"/{tissue}/plots/{plots_type}/pca_loading.png",
-        variance=config["datadir"]+"/{tissue}/plots/{plots_type}/pca_variance.png"
+        config["datadir"]+"/{tissue}/plots/{data_format}/rna_composition.png"
     params:
-        tissue_dir=get_tissue_dir,
-        plots_type="{plots_type}"
+        plots_dir=get_plots_dir
     log:
-        config["datadir"]+"/{tissue}/log/{plots_type}_pca.log"
+        config["datadir"]+"/{tissue}/log/{data_format}_qc.log"
     script:
-        "../scripts/PCA.R"
+        "../scripts/NOISeqPlots.R"
+
 
 rule density:
     input:
-        config["datadir"]+"/{tissue}/rdata/{plots_type}_full.RData",
-        config["datadir"]+"/{tissue}/plots/{plots_type}/pca_score.png"
+        config["datadir"]+"/{tissue}/rdata/{data_format}_full.RData",
+        config["datadir"]+"/{tissue}/plots/{data_format}/rna_composition.png"
     output:
-        outliers=config["datadir"]+"/{tissue}/results/{plots_type}_outliers.tsv",
-        density=config["datadir"]+"/{tissue}/plots/{plots_type}/density.png"
+        outliers=config["datadir"]+"/{tissue}/results/{data_format}_outliers.tsv",
+        density=config["datadir"]+"/{tissue}/plots/{data_format}/density.png"
     params:
         tissue="{tissue}"
     log:
-        config["datadir"]+"/{tissue}/log/{plots_type}_density.log"
+        config["datadir"]+"/{tissue}/log/{data_format}_density.log"
     script:
         "../scripts/densityPlot.R"
 
 rule filter_outliers:
     input:
-        config["datadir"]+"/{tissue}/rdata/{plots_type}_full.RData",
-        outliers=config["datadir"]+"/{tissue}/results/{plots_type}_outliers.tsv"
+        config["datadir"]+"/{tissue}/rdata/{data_format}_full.RData",
+        outliers=config["datadir"]+"/{tissue}/results/{data_format}_outliers.tsv"
     output:
-        config["datadir"]+"/{tissue}/rdata/{plots_type}.RData"
+        config["datadir"]+"/{tissue}/rdata/{data_format}.RData"
     log:
-        config["datadir"]+"/{tissue}/log/{plots_type}_remove_outliers.log"
+        config["datadir"]+"/{tissue}/log/{data_format}_remove_outliers.log"
     script:
         "../scripts/filterOutliers.R"
+
+rule pca:
+    input:
+        config["datadir"]+"/{tissue}/rdata/{arsyn}{data_format}.RData"
+    output:
+        score=config["datadir"]+"/{tissue}/plots/{data_format}/{arsyn}pca_score.png",
+        loading=config["datadir"]+"/{tissue}/plots/{data_format}/{arsyn}pca_loading.png",
+        variance=config["datadir"]+"/{tissue}/plots/{data_format}/{arsyn}pca_variance.png"
+    params:
+        plots_dir=get_plots_dir
+    log:
+        config["datadir"]+"/{tissue}/log/{arsyn}{data_format}_pca.log"
+    script:
+        "../scripts/PCA.R"

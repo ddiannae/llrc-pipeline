@@ -17,8 +17,6 @@
 ##        -Count distribution per sample
 ##        -Count distribution per Experimental factors
 ##    -Bias
-##        -Length bias detection
-##        -GC bias
 ##        -RNA composition
 ##    -PCA
 ##############################################################################
@@ -30,8 +28,7 @@ library(dplyr)
 library(NOISeq)
 library(ggplot2)
 
-PLOTSDIR <-paste(snakemake@params[["tissue_dir"]], "plots", snakemake@params[["plots_type"]], sep="/")
-dir.create(PLOTSDIR, recursive = TRUE)
+PLOTSDIR <- snakemake@params[["plots_dir"]]
 w <- 1024
 h <- 1024
 p <- 24
@@ -44,11 +41,9 @@ load(snakemake@input[[1]])
   ## Reading data into NOISeq package -> mydata
   mydata <- NOISeq::readData(
     data = full$M, 
-    length = full$annot %>% select(gene_id, length) %>% as.data.frame(), 
     biotype = full$annot %>% select(gene_id, gene_type) %>% as.data.frame(), 
     chromosome = full$annot %>% select(chr, start, end) %>% as.data.frame(), 
-    factors = full$targets %>% select(group) %>% as.data.frame(),
-    gc = full$annot %>% select(gene_id, gc) %>% as.data.frame())
+    factors = full$targets %>% select(group) %>% as.data.frame())
 
 }
 ##########################################
@@ -105,22 +100,6 @@ load(snakemake@input[[1]])
 ## Bias
 ##########################################
 {
-  ## Length bias detection
-  mylengthbias <- dat(mydata, factor="group", type="lengthbias")
-  png(paste(PLOTSDIR, "length_bias.png", sep="/"), width=w, height=h, pointsize=p)
-  explo.plot(mylengthbias, samples = NULL, toplot = "global")
-  dev.off()
-  cat("Lenght bias plot generated\n")
-  # Do we see a clear pattern?
-
-  ## GC bias
-  mygcbias <- dat(mydata, factor = "group", type="GCbias")
-  png(paste(PLOTSDIR, "gc_bias.png", sep="/"), width=w, height=h, pointsize=p)
-  explo.plot(mygcbias, samples = NULL, toplot = "global")
-  dev.off()
-  cat("GC bias plot generated\n")
-  # Do we see a clear pattern?
-
   ## RNA composition
   mycomp <- dat(mydata, type="cd")
   png(paste(PLOTSDIR, "rna_composition.png", sep="/"), width=w, height=h, pointsize=p)

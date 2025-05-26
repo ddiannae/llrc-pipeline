@@ -3,7 +3,6 @@ sink(log)
 sink(log, type="message")
 
 library(NOISeq)
-library(readr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -14,26 +13,20 @@ w <- 1024
 h <- 1024
 p <- 24
 
-PLOTSDIR <-paste(snakemake@params[["tissue_dir"]], "plots", 
-                 snakemake@params[["plots_type"]], sep="/")
-dir.create(PLOTSDIR, recursive = TRUE)
+PLOTSDIR <- snakemake@params[["plots_dir"]]
 
 cat("Loading data")
 load(snakemake@input[[1]])
 
 cat("Performing PCA")
+
 mydata <- NOISeq::readData(
   data = full$M, 
-  length = full$annot %>% select(gene_id, length) %>% as.data.frame(), 
-  biotype = full$annot %>% select(gene_id, gene_type) %>% as.data.frame(), 
-  chromosome = full$annot %>% select(chr, start, end) %>% as.data.frame(), 
-  factors = full$targets %>% select(group) %>% as.data.frame(),
-  gc = full$annot %>% select(gene_id, gc) %>% as.data.frame())
+  factors = full$targets %>% select(group) %>% as.data.frame())
 
 pca_dat <- dat(mydata, type = "PCA", logtransf = F)
 pca_results <- pca_dat@dat$result 
 pca_factors <- pca_dat@dat$factors
-
 
 cat("Getting variance plot")
 pc_eigenvalues <- tibble(pc = factor(1:nrow(pca_results$var.exp)), 
@@ -66,7 +59,7 @@ yrange <- range(pc_scores %>% select(pc2, pc3))
   
 g1 <- ggplot(pc_scores, aes(x=pc1, y=pc2, color=group)) +
   geom_point(size=2) +
-  labs(x = "PC1", y = "PC2") +
+  labs(x = paste0("PC1 (", round(pc_eigenvalues$pct[1]*100,2), "%)"), y = paste0("PC2 (", round(pc_eigenvalues$pct[2]*100,2), "%)")) +
   scale_color_manual(values = color_pal) +
   theme_hc(base_size = 20) +
   theme(legend.title = element_blank()) + 
@@ -75,7 +68,7 @@ g1 <- ggplot(pc_scores, aes(x=pc1, y=pc2, color=group)) +
 
 g2 <- ggplot(pc_scores, aes(x=pc1, y=pc3, color=group)) +
   geom_point(size=2) +
-  labs(x = "PC1", y = "PC3") +
+  labs(x = paste0("PC1 (", round(pc_eigenvalues$pct[1]*100,2), "%)"), y = paste0("PC3 (", round(pc_eigenvalues$pct[3]*100,2), "%)")) +
   scale_color_manual(values = color_pal) +
   theme_hc(base_size = 20) +
   theme(legend.title = element_blank()) +
