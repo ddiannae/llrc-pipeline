@@ -1,64 +1,50 @@
-rule normalization_plots:
+rule arsyn:
     input:
-        config["datadir"]+"/{tissue}/results/normalization_results.tsv"
+        config["datadir"]+"/{tissue}/rdata/{data_format}.RData",
     output:
-        config["datadir"]+"/{tissue}/plots/normalization_plots.pdf"
-    params:
-        tissue_dir=get_tissue_dir
+        config["datadir"]+"/{tissue}/rdata/arsyn_{data_format}.RData",
+    threads: 8
     log:
-        config['datadir']+"/{tissue}/log/normalization_plots.log"
+        config['datadir']+"/{tissue}/log/arsyn_{data_format}.log"
     script:
-        "../scripts/normalizationPlots.R"
+        "../scripts/runArsyn.R"
 
-rule normalization_test:
-    input:
-        config["datadir"]+"/{tissue}/rdata/raw.RData",
-    output:
-        results=config["datadir"]+"/{tissue}/results/normalization_results.tsv",
-        gc_norms=config["datadir"]+"/{tissue}/rdata/gc_norms.RData",
-        ln_norms=config["datadir"]+"/{tissue}/rdata/ln_norms.RData"
-    params:
-        tissue_dir=get_tissue_dir,
-    threads: 25
-    log:
-        config['datadir']+"/{tissue}/log/normalization_test.log"
-    script:
-        "../scripts/normalizationTest.R"
- 
-rule user_normalization:
+rule deseq_normalization:
     input:
         config["datadir"]+"/{tissue}/rdata/raw.RData"
     output:
-        norm_rdata=config["datadir"]+"/{tissue}/rdata/{step1}_{step2}_{step3}_no-arsyn_full.RData",
-        normal_matrix=config["datadir"]+"/{tissue}/results/{step1}_{step2}_{step3}_no-arsyn_normal.tsv",
-        cancer_matrix=config["datadir"]+"/{tissue}/results/{step1}_{step2}_{step3}_no-arsyn_cancer.tsv",
-        gene_list=config["datadir"]+"/{tissue}/results/{step1}_{step2}_{step3}_no-arsyn_genelist.txt"
-    params:
-        tissue_dir=get_tissue_dir,
-        step1="{step1}",
-        step2="{step2}",
-        step3="{step3}",
-        xena=is_xena_tissue
+        config["datadir"]+"/{tissue}/rdata/deseq2_full.RData",
+        dds=config["datadir"]+"/{tissue}/rdata/dds.RDS"
     log:
-        config['datadir']+"/{tissue}/log/{step1}_{step2}_{step3}_normalization.log"
+        config["datadir"]+"/{tissue}/log/deseq2_normalization.log"
+    threads: 8
     script:
-        "../scripts/userNormalization.R"
+        "../scripts/deseq2Normalization.R"
 
-rule arsyn:
+rule tpm_normalization:
     input:
-        config["datadir"]+"/{tissue}/rdata/{step1}_{step2}_{step3}_no-arsyn_full.RData",
-        config["datadir"]+"/{tissue}/plots/{step1}_{step2}_{step3}_no-arsyn/density.png"
+        config["datadir"]+"/{tissue}/rdata/raw.RData"
     output:
-        arsyn_rdata=config["datadir"]+"/{tissue}/rdata/{step1}_{step2}_{step3}_si-arsyn_full.RData",
-        normal_matrix=config["datadir"]+"/{tissue}/results/{step1}_{step2}_{step3}_si-arsyn_normal.tsv",
-        cancer_matrix=config["datadir"]+"/{tissue}/results/{step1}_{step2}_{step3}_si-arsyn_cancer.tsv",
-        gene_list=config["datadir"]+"/{tissue}/results/{step1}_{step2}_{step3}_si-arsyn_genelist.txt"
-    params:
-        tissue_dir=get_tissue_dir,
-        step1="{step1}",
-        step2="{step2}",
-        step3="{step3}"
+        config["datadir"]+"/{tissue}/rdata/tpm_full.RData",
     log:
-        config['datadir']+"/{tissue}/log/{step1}_{step2}_{step3}_arsyn.log"
+        config['datadir']+"/{tissue}/log/get_tpms.log"
+    threads: 8
     script:
-        "../scripts/runArsyn.R"
+        "../scripts/tpmNormalization.R"
+
+rule get_norm_matrix:
+    input:
+        config["datadir"]+"/{tissue}/rdata/{arsyn}{data_format}.RData",
+        config["datadir"]+"/{tissue}/plots/{data_format}/{arsyn}pca_score.png"
+    output:
+        cancer=config["datadir"]+"/{tissue}/results/{arsyn}{data_format}_{gene_id}_cancer.tsv",
+        normal=config["datadir"]+"/{tissue}/results/{arsyn}{data_format}_{gene_id}_normal.tsv",
+        genes=config["datadir"]+"/{tissue}/results/{arsyn}{data_format}_{gene_id}_genes.tsv",
+    params:
+        gene_id="{gene_id}"
+    threads: 4
+    log:
+        config['datadir']+"/{tissue}/log/{arsyn}{data_format}_{gene_id}_matrices.log"
+    script:
+        "../scripts/getNormMatrix.R"
+
