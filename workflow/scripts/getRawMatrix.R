@@ -36,90 +36,84 @@ MCCORES <- as.numeric(snakemake@threads[[1]])
 # ## 6. Build target matrix
 # ###############################################################################
 
-RDATADIR <- paste(snakemake@params[["tissue_dir"]], "results", sep="/")
-dir.create(RDATADIR)
-
 if(!IS_XENA) {
   
-  RAWDIR <- paste(snakemake@params[["tissue_dir"]], "raw", sep="/")
-  
+  RAWDIR <- snakemake@params[["raw_dir"]]
+ 
   cat(paste0("Checking ", TYPE, " samples \n"))
      
   ## Find the files
-  files_to_read <- list.files(path = paste0(RAWDIR,"/",  TYPE), 
-                      pattern = "\\.htseq.counts.gz$", full.names = T, recursive = T)
+  files_to_read <- list.files(path = RAWDIR, 
+                              pattern = "\\.rna_seq.augmented_star_gene_counts.tsv$", full.names = T, recursive = T)
   
-  ## Read the data
-  all_files <- lapply(files_to_read, function(file) {
-    data <- read_tsv(file, col_names = c("gene_id", "raw_counts"))
-    data <- data %>% filter(!startsWith(gene_id, "_" ))
-    return(data)
-  })
-  
-  ## Check samples sizes
-  size <- unique(do.call(rbind,lapply(all_files, dim)))
-  stopifnot(nrow(size)==1)
-  cat(paste0(TYPE, " samples have the same size \n"))
-  
-  ## Check genes order in samples
-  genes <- do.call(cbind, lapply(all_files, function(x) dplyr::select(x, "gene_id")))
-  genes <- t(unique(t(genes)))
-  stopifnot(dim(genes)==c(size[1,1], 1))
-  cat(paste0("Genes in ", TYPE, " samples match positions \n"))
+  cat("Got ", length(files_to_read), " samples\n")
   
   ## Build targets matrix
-  targets <- data.frame(id = paste(TISSUE, TYPE, 1:length(files_to_read), sep = "_"),
-                        file = unlist(lapply(strsplit(files_to_read, "/"), "[[", 10)),
-                        file_id = unlist(lapply(strsplit(files_to_read, "/"), "[[", 9)),
-                        group = TYPE, stringsAsFactors = FALSE)
+  targets <- tibble(id = paste(TISSUE, TYPE, 1:length(files_to_read), sep = "_"),
+                    file = unlist(lapply(strsplit(files_to_read, "/"),  function(x) tail(x, n = 1))),
+                    file_id = unlist(lapply(strsplit(files_to_read, "/"),  function(x) tail(x, n = 2)[1])),
+                    group = TYPE)
   
-  ## Rename columns in counts matrix
-  matrix <- bind_cols(lapply(all_files, function(x) dplyr::select(x, "raw_counts")))
-  colnames(matrix) <- targets$id
+  all_data <- lapply(files_to_read, function(file) {
+    id <- targets %>%
+      filter(file == tail(strsplit(!!file, "/")[[1]], n = 1)) %>%
+      pull(id)
+    data <- read_tsv(file, comment = "#") %>% 
+      select(gene_id, gene_name, gene_type, !!id := unstranded) %>% 
+      filter(!startsWith(gene_id, "N_"))
+    
+    return(data)
+  })    
   
-  matrix <- matrix %>% mutate(gene_id = genes[,1]) %>%
-    dplyr::select(gene_id, everything())
+  ## Check samples sizes
+  
+  all_data <- Reduce(inner_join, all_data) 
+  
+  cat(nrow(all_data), " genes from ", ncol(all_data)-1,  " samples\n")
+  
+  all_data <- all_data %>%
+    filter(gene_type %in% c("protein_coding")) %>%
+    distinct(gene_id, .keep_all = T) %>%
+    distinct(gene_name, .keep_all = T) 
+  
+ 
+  matrix <- all_data %>% 
+    dplyr::select(gene_id, all_of(targets$id))
   
 } else {
   XENA_COUNTS <- snakemake@input[[1]]
   XENA_SAMPLES <- snakemake@input[[2]]
   PRIMARY <- snakemake@params[["primary"]]
-  extended_type <- snakemake@params[["extended_type"]]
   
   matrix_samples <- read_tsv(XENA_SAMPLES) %>% clean_names()
   matrix_counts <-  fread(XENA_COUNTS, nThread = MCCORES)
   
-  # When the normal samples should come from TCGA in UCSC Xena, the extended type 
-  # for normal should be: "Solid Tissue Normal". This is only for testing
-  # When the normal samples should come from GTEX in UCSC Xena, the extended type 
-  # for normal should be: "Normal Tissue". This is the usual pipeline
-  if(is.null(extended_type)) {
-    extended_type <- ifelse(TYPE == "normal", "Normal Tissue", "Primary Tumor")  
-  }
-
-  cat("Extented type: ", extended_type, "\n")
   cat("Primary disease or tissue: ", PRIMARY, "\n")
   
   camelTissue <- paste0(toupper(substring(TISSUE, 1, 1)), substring(TISSUE, 2))
   
   cat("Tissue name: ", camelTissue, "\n")
   targets <- matrix_samples %>% dplyr::filter(primary_site == camelTissue &
-                                                primary_disease_or_tissue == PRIMARY &
-                                                sample_type == extended_type)
+                                                primary_disease_or_tissue == PRIMARY)
   cat("Got", nrow(targets), " samples\n")
   
   cat("Getting count matrix\n")
   ### Expected counts from XENA are in log2(expected_count+1)
   ### get them back to expected_count for downstream pipeline
-  matrix <- matrix_counts %>% dplyr::select_if(names(.) %in% c("sample", targets$sample)) %>%
-    dplyr::select(sample, everything())%>% dplyr::mutate(across(-sample, ~ .x^2-1))
+  matrix <- matrix_counts %>% 
+    dplyr::select_if(names(.) %in% c("sample", targets$sample)) %>%
+    dplyr::select(sample, everything()) %>% 
+    dplyr::mutate(across(-sample, ~ round(.x^2-1)))
   matrix[matrix < 0] <- 0
+  
+  cat(nrow(matrix), " genes from ", ncol(matrix)-1,  " samples\n")
     
   targets <- targets %>% dplyr::filter(sample %in% names(matrix)) %>%
     dplyr::mutate(id = paste(TISSUE, TYPE, 1:nrow(.), sep = "_"), group = TYPE) %>% 
     dplyr::rename(file = sample) %>% select(id, file, group)
     
-  matrix <- matrix %>% dplyr::select(sample, targets$file) 
+  matrix <- matrix %>% 
+    dplyr::select(gene_id = sample, all_of(targets$file))
   colnames(matrix) <- c("gene_id", targets$id)
 }
 

@@ -5,15 +5,11 @@ import pandas as pd
 from io import StringIO
 import pathlib
 
-logdir = snakemake.params[0] + "/log"
-manifestdir = snakemake.params[0] + "/manifests"
-pathlib.Path(logdir).mkdir(parents=True, exist_ok=True)
-pathlib.Path(manifestdir).mkdir(parents=True, exist_ok=True)
-
 sys.stderr = open(snakemake.log[0], "w")
+sys.stdout = open(snakemake.log[0], "w")
 
-primary_site = snakemake.params[1]
-sample_type =snakemake.params[2]
+primary_site = snakemake.params[0]
+sample_type =snakemake.params[1]
 sst = sample_type
 
 if (sample_type == "cancer"):
@@ -59,7 +55,7 @@ filters = {
         "op": "in",
         "content":{
             "field": "files.analysis.workflow_type",
-            "value": ["HTSeq - Counts"]
+            "value": ["STAR - Counts"]
             }
         },
         {

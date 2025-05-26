@@ -6,9 +6,6 @@ library(readr)
 library(dplyr)
 library(rtracklayer)
 
-RDATADIR <- paste(snakemake@params[["tissue_dir"]], "rdata", sep="/")
-dir.create(RDATADIR)
-
 IS_XENA <- snakemake@params[["is_xena"]]
 ##############################################################################
 ## Get annotation data
@@ -21,9 +18,7 @@ IS_XENA <- snakemake@params[["is_xena"]]
 if(!IS_XENA) {
   cat("Getting annotation file \n")
   cat("Reading original file \n")
-  ## Annotation file used for RNA-seq pipeline according to:
-  ## https://gdc.cancer.gov/about-data/gdc-data-processing/gdc-reference-files
-  annot <- rtracklayer::import('input/gencode.v22.annotation.gtf.gz')
+  annot <- rtracklayer::import(snakemake@input[["gdc_annot"]])
   annot <- as.data.frame(annot)
   
   ## Only protein coding genes
@@ -45,7 +40,7 @@ if(!IS_XENA) {
 
 cat("Reading new file \n")
 ## Newest gencode file. April, 2021.
-annot_new <-  rtracklayer::import('input/gencode.v37.annotation.gtf.gz')
+annot_new <-  rtracklayer::import(snakemake@params[["new_annot"]])
 annot_new <- as.data.frame(annot_new)
 annot_new <- annot_new %>% dplyr::select(gene_id, gene_name, type, gene_type) %>% 
   dplyr::filter(type == "gene" & gene_type == "protein_coding")
@@ -60,24 +55,6 @@ annot <- annot %>% dplyr::select(-gene_name) %>%
   filter(seqnames %in% paste0("chr", c(as.character(1:22), "X", "Y"))) %>% distinct()
 
 cat('Annotation file new/old merge: ', paste(dim(annot), collapse=", "), '\n')
-
-## We need GC content per gene for normalization. 
-## Query Biomart 80 (accoring to gencode.v22.annotation.gtf, version 79 was used
-## but it is no longer accessible in the website)
-## http://may2015.archive.ensembl.org/biomart
-biomart <- read_tsv("input/Biomart_Ensembl80_GRCh38_p2.txt", 
-                    col_names = c("ensembl_id", "version", "gc"), skip = 1)
-
-## Get only genes matching ensemblID
-biomart <- biomart %>% mutate(gene_id = paste(ensembl_id, version, sep="."))
-
-if(!IS_XENA) {
-  annot <- annot %>%
-    inner_join(biomart %>% dplyr::select(gene_id, gc), by = "gene_id")
-} else {
-  annot <- annot %>%
-    inner_join(biomart %>% dplyr::select(ensembl_id, gc), by = "ensembl_id")
-}
 
 annot <- annot %>% mutate(chr = gsub("chr", "", seqnames)) %>%
   dplyr::rename(length = width) %>%
@@ -121,16 +98,6 @@ cat('annot.RData saved \n')
   
   cat('Total number of annotated (genes/protein-coding) features:', nrow(M), '\n')
   cat('Total number of samples:', ncol(M)-1, '\n')
-  
-  no_gc <- sum(is.na(annot$gc))
-  cat("There are",no_gc, "entries with no GC info \n")
-  
-  ids <- annot %>% filter(!is.na(gc) & !is.na(length)) %>%
-    select(gene_id) %>% unlist(use.names = F)
-  
-  M <- M %>% filter(gene_id %in% ids) %>% arrange(gene_id)
-  annot <- annot %>% filter(gene_id %in% ids) %>% arrange(gene_id)
-  cat("Non GC and lenght annotated genes removed.\n")
   
   ## Save it as a matrix
   ids <- M$gene_id
