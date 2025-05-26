@@ -55,6 +55,11 @@ new_annot: /home/dgarcia/Workspace/llrc/input/gencode.v44.annotation.gtf.gz
 gdc_annot: /home/dgarcia/Workspace/llrc/input/gencode.v36.annotation.gtf.gz
 # Aracne image from: https://github.com/ddiannae/ARACNE-multicore
 aracne_singularity: /home/dgarcia/Workspace/aracne-singularity/aracne_multicore.sif
+lm22: /home/dgarcia/Workspace/regulaciontrans-pipeline/input/LM22.txt
+tr4: /home/dgarcia/Workspace/regulaciontrans-pipeline/input/TR4.txt
+cibersort: /home/dgarcia/Workspace/regulaciontrans-pipeline/bin/CIBERSORT.R
+cibersort_username: 
+cibersort_token: 
 end: ascat
 biomart: /home/dgarcia/Workspace/llrc-pipeline/input/Biomart_Ensembl102_GRCh38_p13.txt
 

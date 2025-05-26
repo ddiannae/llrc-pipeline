@@ -34,7 +34,25 @@ def get_output_files(wildcards):
             files.append(config["datadir"]+"/"+t["name"]+"/correlation/arsyn_tpm_ensembl_cancer_ascat.adj")
             files.append(config["datadir"]+"/"+t["name"]+"/results/cancer-ascat-cnv-genes.tsv")
             files.append(config["datadir"]+"/"+t["name"]+"/results/normal-ascat-cnv-genes.tsv")
+    elif config["end"] == "immune":
+        for t in config["tissues"]:
+            files.append(config["datadir"]+"/"+t["name"]+"/immune/cibersort_tr4_heatmap.png")
+            for j in ["CD31", "CD10", "CD45", "EPCAM"]:
+                files.append(config["datadir"]+"/"+t["name"]+"/cancer_cibersort_tr4/output/cibersort_"+j+".adj")
+                files.append(config["datadir"]+"/"+t["name"]+"/normal_cibersort_tr4/output/cibersort_"+j+".adj")
     return files
+
+def get_cibersort_matrix(wildcards):
+    if wildcards.tissue == "bladder" and wildcards.type == "normal":
+        return config["datadir"]+"/{tissue}/{type}_cibersort_{matrix}/output/CIBERSORTxHiRes_NA_{cell}_Window10.txt"
+    else:
+        return config["datadir"]+"/{tissue}/{type}_cibersort_{matrix}/output/CIBERSORTxHiRes_NA_{cell}_Window16.txt"
+
+def get_signature_matrix(wildcards):
+    if wildcards.matrix == "lm22":
+        return config["lm22"]
+    else:
+        return config["tr4"]
 
 ## raw.smk
 def get_annot_input(wildcards):

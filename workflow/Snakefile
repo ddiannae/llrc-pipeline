@@ -13,6 +13,7 @@ include: "rules/qc.smk"
 include: "rules/raw.smk"
 include: "rules/xena.smk"
 include: "rules/gdc.smk"
+include: "rules/immune.smk"
 include: "rules/ascat.smk"
 
 
