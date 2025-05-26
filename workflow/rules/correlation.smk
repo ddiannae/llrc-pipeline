@@ -1,29 +1,37 @@
-rule aracne:
+rule aracne_ascat:
     input:
-        expr_matrix=config["datadir"]+"/{tissue}/results/{step1}_{step2}_{step3}_{arsyn}_{type}.tsv",
-        density=config["datadir"]+"/{tissue}/plots/{step1}_{step2}_{step3}_{arsyn}/density.png"
+        config["datadir"]+"/{tissue}/results/{arsyn}{data_format}_{gene_id}_{type}.tsv",
+        config["datadir"]+"/{tissue}/results/{type}-ascat-matrix.tsv",
+        config["datadir"]+"/{tissue}/results/{arsyn}{data_format}_{gene_id}_genes.tsv",
     output:
-        config["datadir"]+"/{tissue}/correlation/{step1}_{step2}_{step3}_{arsyn}_{type}_mi.adj"
+        config["datadir"]+"/{tissue}/correlation/{arsyn}{data_format}_{gene_id}_{type}_ascat.adj",
+        #config["datadir"]+"/{tissue}/correlation/{arsyn}{data_format}_{gene_id}_{type}_ascat_matrix.tsv"
     singularity:
         config["aracne_singularity"]
     params:
         get_tissue_dir,
-        "{type}", 
-        "{arsyn}"
-    threads: 39
+        "{arsyn}{data_format}", 
+        "{type}" 
+    threads: 16
     log:
-        config["datadir"]+"/{tissue}/log/{step1}_{step2}_{step3}_{arsyn}_{type}_aracne.log"
+        config["datadir"]+"/{tissue}/log/{arsyn}{data_format}_{gene_id}_{type}_ascat_aracne.log"
+    script:
+        "../scripts/cnv_aracne_matrix.py"
+
+rule aracne:
+    input:
+        config["datadir"]+"/{tissue}/results/{arsyn}{data_format}_{gene_id}_{type}.tsv",
+    output:
+        config["datadir"]+"/{tissue}/correlation/{arsyn}{data_format}_{gene_id}_{type}.adj"
+    singularity:
+        config["aracne_singularity"]
+    params:
+        get_tissue_dir,
+        "{arsyn}{data_format}", 
+        "{type}" 
+    threads: 16
+    log:
+        config["datadir"]+"/{tissue}/log/{arsyn}{data_format}_{gene_id}_{type}_aracne.log"
     script:
         "../scripts/aracne_matrix.py"
 
-rule get_pearson_matrix:
-    input: 
-        config["datadir"]+"/{tissue}/results/{step1}_{step2}_{step3}_{arsyn}_{type}.tsv", 
-        annot=config["datadir"]+"/{tissue}/rdata/annot.RData"
-    output:
-        plot=config["datadir"]+"/{tissue}/correlation/{step1}_{step2}_{step3}_{arsyn}_{type}_heatmap.png",
-        csv=config["datadir"]+"/{tissue}/correlation/{step1}_{step2}_{step3}_{arsyn}_{type}_pearson.tsv"
-    log:
-        config['datadir']+"/{tissue}/log/{step1}_{step2}_{step3}_{arsyn}_{type}_pearson.log"
-    script:
-        "../scripts/getPearsonMatrix.R"

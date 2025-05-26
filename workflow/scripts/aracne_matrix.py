@@ -14,5 +14,4 @@ pathlib.Path(outdir).mkdir(parents=True, exist_ok=True)
     
 ma = Aracne(exp_matrix)
 ma.run(processes=procs, outdir=outdir, pval=1)
-ma.join_adj(outdir, outdir+"/matrix.adj")
-Aracne.adj_to_matrix(outdir+"/matrix.adj", outmatrix)
+ma.build_triu_missing_genes(outdir, outmatrix)
