@@ -1,3 +1,4 @@
+## Snakemake rules to download files from Xena
 rule get_xena_counts:
     output:
         config["datadir"]+"/"+config["xenadir"]+"/counts.gz"

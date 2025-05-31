@@ -1,3 +1,6 @@
+## Snakemake rules for qc steps
+
+## This rule removes genes with mean expression below 10
 rule filter_low_expression:
     input:
         config["datadir"]+"/{tissue}/rdata/raw_full_unfiltered.RData",
@@ -8,6 +11,7 @@ rule filter_low_expression:
     script:
         "../scripts/filterLowExpression.R"
 
+## This rule creates QC plots with NOISeq
 rule qc:
     input:
         config["datadir"]+"/{tissue}/rdata/{data_format}_full.RData"
@@ -20,7 +24,7 @@ rule qc:
     script:
         "../scripts/NOISeqPlots.R"
 
-
+## This rule creates a density plot of the data and identifies outliers
 rule density:
     input:
         config["datadir"]+"/{tissue}/rdata/{data_format}_full.RData",
@@ -35,6 +39,7 @@ rule density:
     script:
         "../scripts/densityPlot.R"
 
+## This rule filters outliers based on the density plot
 rule filter_outliers:
     input:
         config["datadir"]+"/{tissue}/rdata/{data_format}_full.RData",
@@ -46,6 +51,7 @@ rule filter_outliers:
     script:
         "../scripts/filterOutliers.R"
 
+## This rule performs PCA on the filtered data
 rule pca:
     input:
         config["datadir"]+"/{tissue}/rdata/{arsyn}{data_format}.RData"

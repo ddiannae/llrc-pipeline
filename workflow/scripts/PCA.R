@@ -1,3 +1,7 @@
+##################################
+### PCA analysis of RNA-seq data
+### This script gets PCA scores, variance explained, and loadings plots
+##################################
 log <- file(snakemake@log[[1]], open="wt")
 sink(log)
 sink(log, type="message")

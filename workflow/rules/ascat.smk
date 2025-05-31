@@ -1,4 +1,6 @@
-## Snakefile for ASCAT2 files from GDC
+## Snakemake rules for CNV pipeline
+
+## This rule extracts mean CNV values from the ASCAT matrix
 rule get_cnv_genes:
   input:
     ascat_matrix=config["datadir"]+"/{tissue}/results/{type}-ascat-matrix.tsv"
@@ -9,6 +11,7 @@ rule get_cnv_genes:
   script:
     "../scripts/getCNVGenes.R"
 
+## This rule generates a heatmap from the ASCAT matrix
 rule get_heatmap:
   input: 
     config["datadir"]+"/{tissue}/results/{type}-ascat-matrix_all.tsv"
@@ -43,6 +46,7 @@ rule get_ascat_matrix:
   script:
     "../scripts/getAscatMatrix.R"
 
+## This rule downloads the ASCAT files from GDC
 rule get_ascat_files:
   input:
     config["datadir"]+"/{tissue}/manifests/{type}-ascat-manifest.txt"
@@ -57,6 +61,7 @@ rule get_ascat_files:
     touch {output}
     """
 
+## This rule generates the manifest file for the ASCAT files
 rule get_ascat_manifest:
   input:
     config["datadir"]+"/{tissue}/cnvs/done.txt"

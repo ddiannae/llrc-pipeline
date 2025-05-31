@@ -1,5 +1,8 @@
+# Directory to store the results
 datadir: /datos/ot/diana/llrc
+# Name of the folder to store data from Xena
 xenadir: xena
+# List of tissues
 tissues:
 - name: bladder
   tcgat: blca
@@ -50,11 +53,16 @@ tissues:
   tcgat: thca
 - name: uterus
   tcgat: ucec
+# List of tissues to download from Xena
 xena: [colon, skin, pancreas, esophagus, liver, brain, ovary, testis, prostate]
-new_annot: /home/dgarcia/Workspace/llrc/input/gencode.v44.annotation.gtf.gz
-gdc_annot: /home/dgarcia/Workspace/llrc/input/gencode.v36.annotation.gtf.gz
+# Annotation file to update gene names
+new_annot: /home/dgarcia/Workspace/llrc-pipeline/input/gencode.v44.annotation.gtf.gz
+# Annotation file for GDC
+gdc_annot: /home/dgarcia/Workspace/llrc-pipeline/input/gencode.v36.annotation.gtf.gz
 # Aracne image from: https://github.com/ddiannae/ARACNE-multicore
 aracne_singularity: /home/dgarcia/Workspace/aracne-singularity/aracne_multicore.sif
+# End step of the pipeline
 end: ascat
+# Biomart annotations for ASCAT data
 biomart: /home/dgarcia/Workspace/llrc-pipeline/input/Biomart_Ensembl102_GRCh38_p13.txt
 

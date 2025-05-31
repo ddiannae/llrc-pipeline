@@ -1,3 +1,8 @@
+#########################
+### Outlier filtering script. 
+### This script removes outliers from the full dataset, identified
+### in the densityPlot step.
+#########################
 log <- file(snakemake@log[[1]], open="wt")
 sink(log)
 sink(log, type="message")

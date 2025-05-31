@@ -1,3 +1,6 @@
+## Snakemake rules for correlation analysis using ARACNe
+
+## This rule generates a mutual information matrix from aracne for gene expression - gene copy number data.
 rule aracne_ascat:
     input:
         config["datadir"]+"/{tissue}/results/{arsyn}{data_format}_{gene_id}_{type}.tsv",
@@ -5,7 +8,6 @@ rule aracne_ascat:
         config["datadir"]+"/{tissue}/results/{arsyn}{data_format}_{gene_id}_genes.tsv",
     output:
         config["datadir"]+"/{tissue}/correlation/{arsyn}{data_format}_{gene_id}_{type}_ascat.adj",
-        #config["datadir"]+"/{tissue}/correlation/{arsyn}{data_format}_{gene_id}_{type}_ascat_matrix.tsv"
     singularity:
         config["aracne_singularity"]
     params:
@@ -18,6 +20,7 @@ rule aracne_ascat:
     script:
         "../scripts/cnv_aracne_matrix.py"
 
+## This rule generates a mutual information matrix from aracne for gene expression - gene expression data. 
 rule aracne:
     input:
         config["datadir"]+"/{tissue}/results/{arsyn}{data_format}_{gene_id}_{type}.tsv",

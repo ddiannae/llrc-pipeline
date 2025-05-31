@@ -1,5 +1,6 @@
 import glob
 
+## Function to specify final output files based on the end step
 def get_output_files(wildcards):
     files = []
     if config["end"] == "raw":
@@ -36,7 +37,7 @@ def get_output_files(wildcards):
             files.append(config["datadir"]+"/"+t["name"]+"/results/normal-ascat-cnv-genes.tsv")
     return files
 
-## raw.smk
+## Function to get input files for the join_and_annotate rule in raw.smk
 def get_annot_input(wildcards):
     preffix = f'{config["datadir"]}/{wildcards.tissue}/results/'
     input = {
@@ -54,6 +55,7 @@ def get_annot_input(wildcards):
         input["gdc_annot"]=config["gdc_annot"]
         return input
 
+## Function to get input files for the get_raw_matrix rule in raw.smk
 def get_raw_matrix_input(wildcards):
     if is_xena_tissue(wildcards):
         xena_dir = get_xena_dir(wildcards)
@@ -98,7 +100,6 @@ def get_xena_extended_type(wildcards):
 def get_tissue_name(wildcards):
     return [x[f'tissue_name_{wildcards.type}'] if f'tissue_name_{wildcards.type}' in x else x["name"] for x in config["tissues"] if x["name"] == wildcards.tissue][0]
 
-## gdc.smk
 def get_tissue_dir(wildcards):
     return f'{config["datadir"]}/{wildcards.tissue}'
 

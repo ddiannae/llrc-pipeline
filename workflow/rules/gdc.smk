@@ -1,3 +1,4 @@
+## Snakemake rules for downloading GDC data
 rule get_gdc_files:
     input:
         config["datadir"]+"/{tissue}/manifests/{type}-rna_counts.txt"

@@ -1,3 +1,9 @@
+## Snakemake rules for normalization tasks
+
+## This rule runs arsyn for batch correction.
+## Maria j. Nueda, Alberto Ferrer, Ana Conesa, ARSyN: a method for the identification and removal of
+## systematic noise in multifactorial time course microarray experiments,
+## Biostatistics, Volume 13, Issue 3, July 2012, Pages 553–566, https://doi.org/10.1093/biostatistics/kxr042
 rule arsyn:
     input:
         config["datadir"]+"/{tissue}/rdata/{data_format}.RData",
@@ -9,6 +15,7 @@ rule arsyn:
     script:
         "../scripts/runArsyn.R"
 
+## This rule performs DESeq2 normalization.
 rule deseq_normalization:
     input:
         config["datadir"]+"/{tissue}/rdata/raw.RData"
@@ -21,6 +28,7 @@ rule deseq_normalization:
     script:
         "../scripts/deseq2Normalization.R"
 
+## This rule obtains the TPM values from the raw counts.
 rule tpm_normalization:
     input:
         config["datadir"]+"/{tissue}/rdata/raw.RData"
@@ -32,6 +40,7 @@ rule tpm_normalization:
     script:
         "../scripts/tpmNormalization.R"
 
+## This rule saves tsv files with the normalized matrices for cancer and normal samples.
 rule get_norm_matrix:
     input:
         config["datadir"]+"/{tissue}/rdata/{arsyn}{data_format}.RData",

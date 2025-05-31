@@ -1,3 +1,8 @@
+#######################
+## This script extracts the mean copy number values for each gene
+##  from an ASCAT matrix.
+#######################
+
 log <- file(snakemake@log[[1]], open="wt")
 sink(log)
 sink(log, type="message")

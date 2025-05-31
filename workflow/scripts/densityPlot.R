@@ -1,3 +1,8 @@
+###############################
+### Density plot script with outlier detection
+### Outlier samples are thise with total mean expression 
+### more than 2 standard deviations from the mean
+###############################
 log <- file(snakemake@log[[1]], open="wt")
 sink(log)
 sink(log, type="message")
