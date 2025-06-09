@@ -52,6 +52,8 @@ The pipeline consists of the following main steps:
   - BioMart Ensembl Genes 108 to add GC content for QC purposes. 
 - `workflow`: Snakemake rules and scripts used in the workflow.
 
+## References
+
 <a id="1">[1]</a> :Goldman, M.J., Craft, B., Hastie, M. et al. Visualizing and interpreting cancer genomics data via the Xena platform. Nat Biotechnol (2020). https://doi.org/10.1038/s41587-020-0546-8
 
 <a id="2">[2]</a> : Maria j. Nueda, Alberto Ferrer, Ana Conesa, ARSyN: a method for the identification and removal of systematic noise in multifactorial time course microarray experiments, Biostatistics, Volume 13, Issue 3, July 2012, Pages 553–566, https://doi.org/10.1093/biostatistics/kxr042
