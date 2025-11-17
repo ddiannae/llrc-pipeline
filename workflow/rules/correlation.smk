@@ -57,7 +57,7 @@ rule aracne_bootsrap:
 rule generate_aracne_bootstrap:
     input:
         config["datadir"]+"/{tissue}/results/deseq2_ensembl_cancer.tsv",
-        config["datadir"]+"/{tissue}/results/deseq2_ensembl_normal.tsv"
+        config["datadir"]+"/{tissue}/results/deseq2_ensembl_normal.tsv",
         config["datadir"]+"/{tissue}/correlation/bootstrap_samples/done.txt"
     output:
         config["datadir"]+"/{tissue}/correlation/bootstrap_samples/matrix_cancer_bootstrap_"+str(config["bootstrap_samples"])+".tsv"
