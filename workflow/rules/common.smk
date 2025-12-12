@@ -37,7 +37,10 @@ def get_output_files(wildcards):
             files.append(config["datadir"]+"/"+t["name"]+"/results/normal-ascat-cnv-genes.tsv")
     elif config["end"] == "bootstrap":
         for t in config["tissues"]:
-            files.append(config["datadir"]+"/"+t["name"]+"/correlation/bootstrap_samples/aracne_cancer_bootstrap_"+str(config["bootstrap_samples"])+".adj") 
+            if t == "esophagus":
+                files.append(config["datadir"]+"/"+t["name"]+"/correlation/bootstrap_samples/aracne_normal_bootstrap_"+str(config["bootstrap_samples"])+".adj") 
+            else:
+                files.append(config["datadir"]+"/"+t["name"]+"/correlation/bootstrap_samples/aracne_cancer_bootstrap_"+str(config["bootstrap_samples"])+".adj") 
     return files
 
 ## Function to get input files for the join_and_annotate rule in raw.smk

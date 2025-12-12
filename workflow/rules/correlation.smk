@@ -40,33 +40,35 @@ rule aracne:
 
 rule aracne_bootsrap:
     input:
-        config["datadir"]+"/{tissue}/correlation/bootstrap_samples/matrix_cancer_bootstrap_"+str(config["bootstrap_samples"])+".tsv"
+        config["datadir"]+"/{tissue}/correlation/bootstrap_samples/matrix_{cond}_bootstrap_"+str(config["bootstrap_samples"])+".tsv"
     output:
-        config["datadir"]+"/{tissue}/correlation/bootstrap_samples/aracne_cancer_bootstrap_"+str(config["bootstrap_samples"])+".adj"
+        config["datadir"]+"/{tissue}/correlation/bootstrap_samples/aracne_{cond}_bootstrap_"+str(config["bootstrap_samples"])+".adj"
     threads: 8
     singularity:
         config["aracne_singularity"]
     params:
         config["bootstrap_samples"],
-        get_tissue_dir
+        get_tissue_dir,
+        "{cond}"
     log:
-        config["datadir"]+"/{tissue}/log/aracne_bootstrap.log"
+        config["datadir"]+"/{tissue}/log/aracne_{cond}_bootstrap.log"
     script:
         "../scripts/aracne_bootstrap.py"
 
 rule generate_aracne_bootstrap:
     input:
-        config["datadir"]+"/{tissue}/results/deseq2_ensembl_cancer.tsv",
-        config["datadir"]+"/{tissue}/results/deseq2_ensembl_normal.tsv",
+        config["datadir"]+"/{tissue}/results/arsyn_tpm_ensembl_cancer.tsv",
+        config["datadir"]+"/{tissue}/results/arsyn_tpm_ensembl_normal.tsv",
         config["datadir"]+"/{tissue}/correlation/bootstrap_samples/done.txt"
     output:
-        config["datadir"]+"/{tissue}/correlation/bootstrap_samples/matrix_cancer_bootstrap_"+str(config["bootstrap_samples"])+".tsv"
+        config["datadir"]+"/{tissue}/correlation/bootstrap_samples/matrix_{cond}_bootstrap_"+str(config["bootstrap_samples"])+".tsv"
     params:
         config["bootstrap_samples"],
         get_tissue_dir,
+        "{cond}"
     threads: 4
     log:
-        config["datadir"]+"/{tissue}/log/generate_aracne_bootstrap.log"
+        config["datadir"]+"/{tissue}/log/generate_{cond}_aracne_bootstrap.log"
     script:
         "../scripts/aracne_bootstrap_matrices.py"
 
